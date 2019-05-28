@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 let validator = require('validator');
+const bcrypt = require('bcrypt');
+const saltRounds = 13;
 
 
 const UserSchema = mongoose.Schema({
@@ -9,7 +11,7 @@ const UserSchema = mongoose.Schema({
         username: {
             type: String,
             unique: true,
-            minlength: [8, 'Username is too short (min. 8 char.)']
+            minlength: [5, 'Username is too short (min. 8 char.)']
         },
         password: {
             type: String,
@@ -44,7 +46,7 @@ const UserSchema = mongoose.Schema({
 
     answeredQuestions: [
         {
-            questionId: {
+            answerId: {
                 type: String,
             }
         }
@@ -54,8 +56,11 @@ const UserSchema = mongoose.Schema({
         type: Date,
         default: Date.now()
     },
+});
 
-
+UserSchema.pre('save', function(next){
+    this.authData.password = bcrypt.hashSync(this.authData.password, saltRounds);
+    next();
 });
 
 module.exports = mongoose.model('User', UserSchema);

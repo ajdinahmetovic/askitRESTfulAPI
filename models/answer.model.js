@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
-let validator = require('validator');
 
 const AnswerSchema = mongoose.Schema({
+
+    questionId: {
+        type: String,
+        required: true
+    },
 
     author: {
         type: String,
@@ -14,21 +18,8 @@ const AnswerSchema = mongoose.Schema({
     },
 
     rating: {
-        likes: [
-            {
-                userId: {
-                    type: String,
-                }
-            }
-        ],
-
-        dislike:[
-            {
-                userId: {
-                    type: String,
-                }
-            }
-        ],
+        likes: [],
+        dislike:[],
     },
 
     createdAt: {

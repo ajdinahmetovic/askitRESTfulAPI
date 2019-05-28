@@ -4,6 +4,10 @@ let validator = require('validator');
 
 const QuestionSchema = mongoose.Schema({
 
+    userId: {
+        type: String,
+        required: true
+    },
 
     author: {
         type: String,
@@ -13,32 +17,20 @@ const QuestionSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+
+    // Keep ID of answers
     answers: [
         {
-            answerId: {
-                type: String,
+            questionId: {
+                type: String
             }
-
         }
     ],
+
+    // Keep ID of users who liked/disliked questions
     rating: {
-      likes: [
-          {
-              userId: {
-                  type: String,
-              }
-          }
-      ],
-
-      dislike:[
-            {
-                userId: {
-                    type: String,
-                }
-            }
-      ],
-
-
+      likes: [String],
+      dislike: [String],
     },
 
     createdAt: {

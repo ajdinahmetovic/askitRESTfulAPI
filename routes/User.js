@@ -1,6 +1,7 @@
 let User = require('../models/user.model');
 let express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 
 let router = express.Router();
@@ -15,7 +16,7 @@ router.post('/user', (req, res) => {
     model.save()
         .then(doc => {
             if(!doc || doc.length === 0){
-                return res.status(500).send(doc);
+                return res.status(500).json(doc);
             }
             res.status(201).send(doc);
         })
@@ -25,6 +26,30 @@ router.post('/user', (req, res) => {
 });
 
 router.post('/user/login', (req, res) => {
+    if(!req.body){
+        return res.status(400).send('Request body missing');
+    }
+
+    User.findOne({'authData.username': req.body.authData.username})
+        .then(user => {
+            if(user && bcrypt.compareSync(req.body.authData.password, user.authData.password)) {
+                jwt.sign({user}, 'MoP', (err, token)=> {
+                    if(err){
+                        res.status(500).json(err);
+                    }
+                    res.status(201).json({token: token, user: user});
+                });
+
+            } else {
+                res.status(500).json({message: 'Wrong username or password'});
+            }
+        })
+        .catch(err => {
+            res.send(err);
+        })
+});
+
+router.put('/user/renew', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
@@ -46,14 +71,7 @@ router.post('/user/login', (req, res) => {
         .catch(err => {
             res.send(err);
         })
-});
 
-router.put('/user', (req, res) => {
-    if(!req.body){
-        return res.status(400).send('Request body missing');
-    }
-
-    let model = new User(req.body);
 
 
 });

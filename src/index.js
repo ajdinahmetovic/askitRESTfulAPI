@@ -1,7 +1,7 @@
 let express = require('express');
 const mongoose = require('mongoose');
 let app = express();
-mongoose.connect("mongodb+srv://malatajna:malatajna@cluster0-qkh3b.mongodb.net/askit?retryWrites=true\n");
+mongoose.connect("mongodb+srv://malatajna:malatajna@cluster0-qkh3b.mongodb.net/askit?retryWrites=true");
 
 let userRoute = require('../routes/User');
 let questionRoute = require('../routes/Question');
