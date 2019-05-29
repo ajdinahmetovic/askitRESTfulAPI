@@ -49,11 +49,29 @@ router.post('/user/login', (req, res) => {
         })
 });
 
+
+router.get('/user/top', (req, res) => {
+
+    User.find()
+        .sort({answeredQuestions: -1})
+        .limit(20)
+        .then((doc, err) => {
+
+            if(doc){
+                res.status(201).json(doc)
+            }
+            res.json(err);
+        })
+        .catch(err => {
+            res.json(err);
+        })
+});
+
+
 router.put('/user/renew', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
-
     User.findOne(req.body)
         .then(doc => {
             if(doc) {
@@ -71,9 +89,6 @@ router.put('/user/renew', (req, res) => {
         .catch(err => {
             res.send(err);
         })
-
-
-
 });
 
 

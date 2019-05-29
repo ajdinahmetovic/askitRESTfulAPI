@@ -43,7 +43,7 @@ router.get('/question/:id', (req, res) => {
 
 router.get('/question', (req, res) => {
     Question.find()
-        .sort(req.query.sort === 'date' ? {createdAt: -1} : req.query.sort === 'hot' ? {'rating.hot': -1} : '')
+        .sort(req.query.sort === 'date' ? {createdAt: -1} : req.query.sort === 'hot' ? {'rating.likes': -1} : '')
         .skip((req.query.count * 20) - 20)
         .limit(req.query.count * 20)
         .then((doc, err) => {
