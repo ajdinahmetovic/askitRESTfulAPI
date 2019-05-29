@@ -57,41 +57,47 @@ router.get('/question', (req, res) => {
         })
 });
 
-router.post('/question/answer', (req, res) => {
+router.post('/question/answer', verifyToken, (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
     let questionId = req.body.answer.questionId;
     let answer = new Answer(req.body.answer);
+    let responseObject;
     answer.save()
         .then(doc => {
             if(!doc){
-                res.json({message: 'Error while saving answer'})
+                res.status(500).json({message: 'Error while saving answer'})
+            } else {
+                Question.findByIdAndUpdate(questionId, {'$push': {answers: answer}}, {new: true})
+                    .then((doc, err) => {
+                        if(doc){
+                            User.findByIdAndUpdate(req.body.userId, {'$push': {answeredQuestions: doc}}, {new: true})
+                                .then((doc, err) => {
+                                    if(err){
+                                        res.status(500).json({message: 'Error'});
+                                    }
+                                    console.log(responseObject);
+                                    //res.json(responseObject);
+                                }).catch(err => {
+                                res.send(err);
+                            });
+                        }
+
+                        res.json(err)
+                    })
+
+                    .catch(err => {
+                        res.send(err);
+                    });
+
+                res.status(201).json(doc);
             }
         })
-        .catch(err =>{
+        .catch(err => {
             res.json(err);
     });
-    Question.findByIdAndUpdate(questionId, {'$push': {answers: answer}}, {new: true})
-        .then((doc, err) => {
-            if(doc){
-                User.findByIdAndUpdate(req.body.userId, {'$push': {answeredQuestions: doc}}, {new: true})
-                    .then((doc, err) => {
-                        if(err){
-                            res.json(err);
-                        }
-                    }).catch(err => {
-                    res.send(err);
-                });
-                res.json(doc);
-            }
 
-            res.json(err)
-        })
-
-        .catch(err => {
-            res.send(err);
-        });
 });
 
 router.put('/question/like', (req, res) => {
