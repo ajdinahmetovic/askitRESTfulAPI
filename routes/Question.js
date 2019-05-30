@@ -19,13 +19,6 @@ router.post('/question', verifyToken, (req, res) => {
             if(!doc || doc.length === 0){
                 return res.status(500).send(doc);
             }
-            User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true })
-                .then(usr => {
-                    if(user) {
-                        res.status(201).send(doc);
-                    }
-                    return res.status(500).send(usr);
-                })
         })
         .catch(err => {
             res.status(500).json(err)
