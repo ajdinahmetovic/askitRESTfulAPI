@@ -22,7 +22,7 @@ router.post('/question', verifyToken, (req, res) => {
             User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true })
                 .then(usr => {
                     if(user) {
-                        res.status(201).json(doc);
+                        res.status(201).send(doc);
                     }
                     return res.status(500).send(usr);
                 })
