@@ -16,21 +16,16 @@ router.post('/question', verifyToken, (req, res) => {
 
     model.save()
         .then(doc => {
-            if(doc){
-                User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true })
-                    .then(usr => {
-                        if(usr) {
-                            res.status(201).send(doc);
-                        }
-                        return res.status(500).send(usr);
-                    })
-                    .catch(err => {
-                        return res.status(500).send(err);
-                    })
+            if(!doc || doc.length === 0){
+                return res.status(500).send(doc);
             }
-
-            return res.status(500).send(doc);
-
+            User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true })
+                .then(usr => {
+                    if(user) {
+                        res.status(201).json(doc);
+                    }
+                    return res.status(500).send(usr);
+                })
         })
         .catch(err => {
             res.status(500).json(err)

@@ -72,9 +72,8 @@ router.put('/user/change', (req, res) => {
         return res.status(400).send('Request body missing');
     }
 
-
     User.findById(req.body.userId)
-        .then(user => {
+        .then((user, err) => {
             if(user && bcrypt.compareSync(req.body.oldPassword, user.authData.password)) {
                 User.findByIdAndUpdate(req.body.userId, { 'authData.password': bcrypt.hashSync(req.body.newPassword, saltRounds)}, {new: true})
                     .then(user => {
@@ -86,13 +85,13 @@ router.put('/user/change', (req, res) => {
                         });
                     })
                     .catch(err => {
-                        res.send(500).json(err);
+                        res.status(500).json(err);
                     })
             }
-            res.send(500).json({message: 'Error happened'})
+            res.status(500).send(user)
         })
         .catch(err => {
-            res.send(500).json(err);
+            res.status(500).json(err);
         })
 
 
