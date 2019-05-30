@@ -16,10 +16,21 @@ router.post('/question', verifyToken, (req, res) => {
 
     model.save()
         .then(doc => {
-            if(!doc || doc.length === 0){
-                return res.status(500).send(doc);
+            if(doc){
+                User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true })
+                    .then(usr => {
+                        if(usr) {
+                            res.status(201).send(doc);
+                        }
+                        return res.status(500).send(usr);
+                    })
+                    .catch(err => {
+                        return res.status(500).send(err);
+                    })
             }
-            res.status(201).send(doc);
+
+            return res.status(500).send(doc);
+
         })
         .catch(err => {
             res.status(500).json(err)
@@ -31,12 +42,14 @@ router.get('/question/:id', (req, res) => {
     Question.findOne({_id: req.params.id})
         .then( doc => {
             if(doc){
-                res.json(doc);
+                res.status(201).json(doc);
             }
-            res.json({message: 'Ding dong your opinion is wrong '})
+            res.status(500).json({message: 'Ding dong your opinion is wrong '})
+
+
         })
         .catch(err =>{
-
+            res.status(500).json(err)
         })
 
 });
@@ -48,12 +61,12 @@ router.get('/question', (req, res) => {
         .limit(req.query.count * 20)
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         })
         .catch(err => {
-            res.send(err)
+            res.status(500).send(err)
         })
 });
 
@@ -77,25 +90,23 @@ router.post('/question/answer', verifyToken, (req, res) => {
                                     if(err){
                                         res.status(500).json({message: 'Error'});
                                     }
-                                    console.log(responseObject);
-                                    //res.json(responseObject);
                                 }).catch(err => {
-                                res.send(err);
+                                res.status(500).send(err);
                             });
                         }
 
-                        res.json(err)
+                        res.status(500).json(err)
                     })
 
                     .catch(err => {
-                        res.send(err);
+                        res.status(500).send(err);
                     });
 
                 res.status(201).json(doc);
             }
         })
         .catch(err => {
-            res.json(err);
+            res.status(500).json(err);
     });
 
 });
@@ -107,11 +118,11 @@ router.put('/question/like', (req, res) => {
     Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         }).catch(err =>{
-        res.send(err);
+        res.status(500).send(err);
     })
 
 });
@@ -123,11 +134,11 @@ router.put('/question/dislike', (req, res) => {
     Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         }).catch(err =>{
-        res.send(err);
+        res.status(500).send(err);
     })
 
 });
@@ -139,7 +150,7 @@ function verifyToken(req, res, next) {
 
     const bearer = req.headers['authorization'];
     if(typeof bearer === 'undefined'){
-        res.json({message: 'tokenFail'})
+        res.status(500).json({message: 'tokenFail'})
     }
     const headerToken = bearer.split(' ');
 
@@ -147,7 +158,7 @@ function verifyToken(req, res, next) {
 
     jwt.verify(token, 'MoP', (err, authData) => {
         if(err){
-            res.json({message: 'Token is invalid'})
+            res.status(500).json({message: 'Token is invalid'})
         }
         next();
     });

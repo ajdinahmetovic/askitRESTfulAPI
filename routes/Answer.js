@@ -5,6 +5,7 @@ let express = require('express');
 const jwt = require('jsonwebtoken');
 
 
+
 let router = express.Router();
 
 router.get('/answer', (req, res) => {
@@ -15,29 +16,28 @@ router.get('/answer', (req, res) => {
         .limit(req.query.count * 20)
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         })
         .catch(err => {
-            res.send(err)
+            res.status(500).send(err)
         });
 
 });
 
 router.put('/answer/like', (req, res) => {
-
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
     Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         }).catch(err =>{
-        res.json(err);
+        res.status(500).json(err);
     })
 
 });
@@ -50,16 +50,13 @@ router.put('/answer/dislike', (req, res) => {
     Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.json(doc)
+                res.status(201).json(doc)
             }
-            res.json(err);
+            res.status(500).json(err);
         }).catch(err =>{
-        res.json(err);
+        res.status(500).json(err);
     })
 
 });
-
-
-
 
 module.exports = router;

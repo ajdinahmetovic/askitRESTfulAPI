@@ -2,7 +2,7 @@ let User = require('../models/user.model');
 let express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
+const saltRounds = 13;
 
 let router = express.Router();
 
@@ -67,8 +67,39 @@ router.get('/user/top', (req, res) => {
         })
 });
 
+router.put('/user/change', (req, res) => {
+    if(!req.body){
+        return res.status(400).send('Request body missing');
+    }
 
-router.put('/user/renew', (req, res) => {
+
+    User.findById(req.body.userId)
+        .then(user => {
+            if(user && bcrypt.compareSync(req.body.oldPassword, user.authData.password)) {
+                User.findByIdAndUpdate(req.body.userId, { 'authData.password': bcrypt.hashSync(req.body.newPassword, saltRounds)}, {new: true})
+                    .then(user => {
+                        jwt.sign({user}, 'MoP', (err, token)=> {
+                            if(err){
+                                res.status(500).json(err);
+                            }
+                            res.status(201).json({token: token});
+                        });
+                    })
+                    .catch(err => {
+                        res.send(500).json(err);
+                    })
+            }
+            res.send(500).json({message: 'Error happened'})
+        })
+        .catch(err => {
+            res.send(500).json(err);
+        })
+
+
+});
+
+// NOT USED
+router.put('/user/renewToken', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
@@ -77,17 +108,17 @@ router.put('/user/renew', (req, res) => {
             if(doc) {
                 jwt.sign({doc}, 'MoP', {expiresIn: '1h'}, (err, token)=> {
                     if(err){
-                        res.json(err);
+                        res.status(500).json(err);
                     }
-                    res.send(token);
+                    res.status(201).send(token);
                 });
 
             } else {
-                res.json({message: 'User nt found'});
+                res.status(500).json({message: 'User nt found'});
             }
         })
         .catch(err => {
-            res.send(err);
+            res.status(500).send(err);
         })
 });
 
