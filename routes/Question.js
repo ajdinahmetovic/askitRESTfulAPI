@@ -19,11 +19,20 @@ router.post('/question', verifyToken, (req, res) => {
             if(!doc || doc.length === 0){
                 return res.status(500).send(doc);
             }
-            res.status(201).send(doc);
+
+            User.findByIdAndUpdate(req.body.userId, {'$push': {myQuestions: doc}}, {new: true})
+                .then(usr => {
+                    if(!usr){
+                        res.status(500).json({message: 'Error'});
+                    }
+                });
+
+            res.status(201).json(doc);
         })
         .catch(err => {
             res.status(500).json(err)
         })
+
 });
 
 router.get('/question/:id', (req, res) => {
@@ -141,8 +150,8 @@ function verifyToken(req, res, next) {
     if(typeof bearer === 'undefined'){
         res.status(500).json({message: 'tokenFail'})
     }
-    const headerToken = bearer.split(' ');
 
+    const headerToken = bearer.split(' ');
     const token = headerToken[1];
 
     jwt.verify(token, 'MoP', (err, authData) => {
