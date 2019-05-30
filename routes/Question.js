@@ -116,7 +116,7 @@ router.put('/question/like', (req, res) => {
     Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.status(201).json(doc)
+                res.status(201).json(doc.rating)
             }
             res.status(500).json(err);
         }).catch(err =>{
@@ -132,7 +132,7 @@ router.put('/question/dislike', (req, res) => {
     Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
-                res.status(201).json(doc)
+                res.status(201).json(doc.rating)
             }
             res.status(500).json(err);
         }).catch(err =>{

@@ -18,7 +18,15 @@ router.post('/user', (req, res) => {
             if(!doc || doc.length === 0){
                 return res.status(500).json(doc);
             }
-            res.status(201).send(doc);
+
+            jwt.sign({doc}, 'MoP', (err, token)=> {
+                if(err){
+                    res.status(500).json(err);
+                }
+                res.status(201).json({token: token, user: doc});
+            });
+
+            //res.status(201).send(doc);
         })
         .catch(err => {
             res.status(500).json(err)
@@ -73,11 +81,12 @@ router.put('/user/change', (req, res) => {
     }
 
     User.findById(req.body.userId)
-        .then((user, err) => {
+        .then(user => {
+
             if(user && bcrypt.compareSync(req.body.oldPassword, user.authData.password)) {
                 User.findByIdAndUpdate(req.body.userId, { 'authData.password': bcrypt.hashSync(req.body.newPassword, saltRounds)}, {new: true})
-                    .then(user => {
-                        jwt.sign({user}, 'MoP', (err, token)=> {
+                    .then(doc => {
+                        jwt.sign({doc}, 'MoP', (err, token)=> {
                             if(err){
                                 res.status(500).json(err);
                             }
@@ -87,8 +96,9 @@ router.put('/user/change', (req, res) => {
                     .catch(err => {
                         res.status(500).json(err);
                     })
+            } else {
+                res.status(500).send({message: 'Error occurred'})
             }
-            res.status(500).send(user)
         })
         .catch(err => {
             res.status(500).json(err);
