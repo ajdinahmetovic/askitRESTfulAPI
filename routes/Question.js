@@ -134,15 +134,35 @@ router.put('/question/like', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
-    Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
-        .then((doc, err) => {
+
+    Question.findById(req.body.questionId)
+        .then(doc => {
             if(doc){
-                res.status(201).json(doc.rating)
+                // console.log(doc.rating.likes.includes(req.body.userId));
+                if(!doc.rating.likes.includes(req.body.userId)) {
+                    Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
+                        .then((doc, err) => {
+                            if(doc){
+                                res.status(201).json(doc.rating)
+                            }
+                            res.status(500).json(err);
+                        }).catch(err =>{
+                        res.status(500).send(err);
+                    })
+
+                } else {
+                    res.send(doc.rating);
+                }
             }
-            res.status(500).json(err);
-        }).catch(err =>{
-        res.status(500).send(err);
-    })
+            if(doc === null){
+                res.status(500).json(doc);
+            }
+        })
+        .catch(err => {
+            res.status(500).json('err');
+        })
+
+
 
 });
 
@@ -150,6 +170,37 @@ router.put('/question/dislike', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
+
+
+
+    Question.findById(req.body.questionId)
+        .then(doc => {
+            if(doc){
+                // console.log(doc.rating.likes.includes(req.body.userId));
+                if(!doc.rating.dislike.includes(req.body.userId)) {
+                    Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
+                        .then((doc, err) => {
+                            if(doc){
+                                res.status(201).json(doc.rating)
+                            }
+                            res.status(500).json(err);
+                        }).catch(err =>{
+                        res.status(500).send(err);
+                    })
+
+                } else {
+                    res.send(doc.rating);
+                }
+            }
+            if(doc === null){
+                res.status(500).json(doc);
+            }
+        })
+        .catch(err => {
+            res.status(500).json('err');
+        });
+
+    /*
     Question.findByIdAndUpdate(req.body.questionId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
         .then((doc, err) => {
             if(doc){
@@ -159,6 +210,7 @@ router.put('/question/dislike', (req, res) => {
         }).catch(err =>{
         res.status(500).send(err);
     })
+    */
 
 });
 

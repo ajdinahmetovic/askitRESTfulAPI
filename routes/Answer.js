@@ -30,15 +30,35 @@ router.put('/answer/like', (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
-    Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
-        .then((doc, err) => {
+
+
+    Answer.findById(req.body.answerId)
+        .then(doc => {
             if(doc){
-                res.status(201).json(doc)
+                // console.log(doc.rating.likes.includes(req.body.userId));
+                if(!doc.rating.likes.includes(req.body.userId)) {
+                    Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.likes': req.body.userId}}, {new: true})
+                        .then((doc, err) => {
+                            if(doc){
+                                res.status(201).json(doc.rating)
+                            }
+                            res.status(500).json(err);
+                        }).catch(err =>{
+                        res.status(500).send(err);
+                    })
+
+                } else {
+                    res.send(doc.rating);
+                }
             }
-            res.status(500).json(err);
-        }).catch(err =>{
-        res.status(500).json(err);
-    })
+            if(doc === null){
+                res.status(500).json(doc);
+            }
+        })
+        .catch(err => {
+            res.status(500).json('err');
+        });
+
 
 });
 
@@ -47,15 +67,33 @@ router.put('/answer/dislike', (req, res) => {
         return res.status(400).send('Request body missing');
     }
 
-    Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
-        .then((doc, err) => {
+
+    Answer.findById(req.body.answerId)
+        .then(doc => {
             if(doc){
-                res.status(201).json(doc)
+                // console.log(doc.rating.likes.includes(req.body.userId));
+                if(!doc.rating.dislike.includes(req.body.userId)) {
+                    Answer.findByIdAndUpdate(req.body.answerId, {'$push': {'rating.dislike': req.body.userId}}, {new: true})
+                        .then((doc, err) => {
+                            if(doc){
+                                res.status(201).json(doc.rating)
+                            }
+                            res.status(500).json(err);
+                        }).catch(err =>{
+                        res.status(500).send(err);
+                    })
+
+                } else {
+                    res.send(doc.rating);
+                }
             }
-            res.status(500).json(err);
-        }).catch(err =>{
-        res.status(500).json(err);
-    })
+            if(doc === null){
+                res.status(500).json(doc);
+            }
+        })
+        .catch(err => {
+            res.status(500).json('err');
+        });
 
 });
 
