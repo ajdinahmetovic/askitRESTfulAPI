@@ -53,7 +53,7 @@ router.get('/question/:id', (req, res) => {
 
 });
 */
-router.get('/question', (req, res) => {
+router.get('/question', verifyToken, (req, res) => {
     Question.find()
         .sort(req.query.sort === 'date' ? {createdAt: -1} : req.query.sort === 'hot' ? {'rating.likes': -1} : '')
         .skip((req.query.count * 20) - 20)
@@ -69,7 +69,7 @@ router.get('/question', (req, res) => {
         })
 });
 
-router.get('/question/my', (req, res) => {
+router.get('/question/my', verifyToken, (req, res) => {
 
     //console.log('Log ::' + req.query);
 
@@ -130,7 +130,7 @@ router.post('/question/answer', verifyToken, (req, res) => {
 
 });
 
-router.put('/question/like', (req, res) => {
+router.put('/question/like', verifyToken, (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
@@ -166,7 +166,7 @@ router.put('/question/like', (req, res) => {
 
 });
 
-router.put('/question/dislike', (req, res) => {
+router.put('/question/dislike', verifyToken, (req, res) => {
     if(!req.body){
         return res.status(400).send('Request body missing');
     }
