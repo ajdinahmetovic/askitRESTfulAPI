@@ -4,6 +4,7 @@ let User = require('../models/user.model');
 
 let express = require('express');
 const jwt = require('jsonwebtoken');
+const mongoose = require("mongoose");
 
 let router = express.Router();
 
@@ -34,7 +35,7 @@ router.post('/question', verifyToken, (req, res) => {
         })
 
 });
-
+/*
 router.get('/question/:id', (req, res) => {
 
     Question.findOne({_id: req.params.id})
@@ -51,7 +52,7 @@ router.get('/question/:id', (req, res) => {
         })
 
 });
-
+*/
 router.get('/question', (req, res) => {
     Question.find()
         .sort(req.query.sort === 'date' ? {createdAt: -1} : req.query.sort === 'hot' ? {'rating.likes': -1} : '')
@@ -66,6 +67,26 @@ router.get('/question', (req, res) => {
         .catch(err => {
             res.status(500).send(err)
         })
+});
+
+router.get('/question/my', (req, res) => {
+
+    //console.log('Log ::' + req.query);
+
+    Question.find({userId: req.query.userId})
+        .skip((req.query.count * 20) - 20)
+        .limit(req.query.count * 20)
+        .then(doc => {
+            if(doc){
+                res.status(201).json(doc)
+            }
+            res.status(500).json('Error');
+        })
+        .catch(err => {
+
+            res.status(500).send(err)
+        })
+
 });
 
 router.post('/question/answer', verifyToken, (req, res) => {

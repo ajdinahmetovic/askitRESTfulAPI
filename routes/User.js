@@ -90,7 +90,7 @@ router.put('/user/change', (req, res) => {
                             if(err){
                                 res.status(500).json(err);
                             }
-                            res.status(201).json({token: token});
+                            res.status(201).json({token: token, user: doc});
                         });
                     })
                     .catch(err => {
