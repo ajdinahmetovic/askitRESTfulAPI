@@ -59,7 +59,6 @@ router.post('/user/login', (req, res) => {
 
 
 router.get('/user/top', (req, res) => {
-
     User.find()
         .sort({answeredQuestions: -1})
         .limit(20)
@@ -72,6 +71,21 @@ router.get('/user/top', (req, res) => {
         })
         .catch(err => {
             res.json(err);
+        })
+});
+
+router.get('/user/stats/:id', verifyToken, (req, res) => {
+
+    console.log(req.params.id);
+    User.findById(req.params.id)
+        .then(doc => {
+            if(doc){
+                res.status(201).json({ myQuestionsLen: doc.myQuestions.length, answeredQuestionsLen: doc.answeredQuestions.length})
+            }
+            res.status(500).json(doc);
+        })
+        .catch(err => {
+            res.status(500).json(err);
         })
 });
 
@@ -131,5 +145,27 @@ router.put('/user/renewToken', (req, res) => {
         })
 });
 
+function verifyToken(req, res, next) {
+
+    //auth: Bearer <jwt_token>
+
+    const bearer = req.headers['authorization'];
+    if(typeof bearer === 'undefined'){
+        res.status(500).json({message: 'tokenFail'})
+    }
+
+    const headerToken = bearer.split(' ');
+    const token = headerToken[1];
+
+    jwt.verify(token, 'MoP', (err, authData) => {
+        if(err){
+            res.status(500).json({message: 'Token is invalid'})
+        }
+        next();
+    });
+
+
+
+}
 
 module.exports = router;
